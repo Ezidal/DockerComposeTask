@@ -1,5 +1,5 @@
 <?php
-define ( 'WP_CACHE', true);
+
 /**
  * The base configuration for WordPress
  *
@@ -65,14 +65,20 @@ define( 'DB_CHARSET', getenv_docker('WORDPRESS_DB_CHARSET', 'utf8') );
 /** The database collate type. Don't change this if in doubt. */
 define( 'DB_COLLATE', getenv_docker('WORDPRESS_DB_COLLATE', '') );
 
+
 /** Reddis */
-define('WP_REDIS_HOST', getenv('WP_REDIS_HOST') ); // Значение по умолчанию 'redis'
+// Проверяем, определена ли переменная WORDPRESS_CONFIG_EXTRA
+if (defined('WORDPRESS_CONFIG_EXTRA')) {
+    eval(WORDPRESS_CONFIG_EXTRA); // Выполняем код из переменной
+}
+define ( 'WP_CACHE', true);
+// define('WP_REDIS_HOST', getenv('WP_REDIS_HOST') ); // Значение по умолчанию 'redis'
 
-// Определение порта Redis
-define('WP_REDIS_PORT', getenv('WP_REDIS_PORT')); // Значение по умолчанию '6379'
+// // Определение порта Redis
+// define('WP_REDIS_PORT', getenv('WP_REDIS_PORT')); // Значение по умолчанию '6379'
 
-// Определение соли кэша
-define('WP_CACHE_KEY_SALT', getenv('WP_CACHE_KEY_SALT') );
+// // Определение соли кэша
+// define('WP_CACHE_KEY_SALT', getenv('WP_CACHE_KEY_SALT') );
 
 /**#@+
  * Authentication unique keys and salts.

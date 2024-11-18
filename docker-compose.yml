@@ -9,8 +9,11 @@ services:
       WORDPRESS_DB_USER: ${MYSQL_USER}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_CONFIG_EXTRA: ${WORDPRESS_CONFIG_EXTRA}
     volumes:
-      - ./wp-config.php/:/var/www/html/wp-config.php
+      - ./wp-config.php:/var/www/html/wp-config.php
+      # - ./wp-config-sample.php:/var/www/html/wp-config-sample.php
+      - ./wp-content/:/var/www/html/wp-content
     depends_on:
       db:
         condition: service_healthy
