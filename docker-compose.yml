@@ -1,11 +1,7 @@
-version: '3.1'
-
 services:
-#############
   wordpress:
     container_name: wordpress
     image: wordpress
-    #restart: always
     ports:
       - 8080:80
     environment:
@@ -14,7 +10,7 @@ services:
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
     volumes:
-      - ./wordpress/:/var/www/html
+      - ./wp-config.php/:/var/www/html/wp-config.php
     depends_on:
       db:
         condition: service_healthy
@@ -31,8 +27,6 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - ./db:/var/lib/mysql
     networks:
       - wp_db_rd
     healthcheck:
@@ -49,7 +43,6 @@ services:
       - "80:80"
     volumes:
       - ./nginx:/etc/nginx/conf.d/
-      - ./wordpress:/var/www/html
     depends_on:
       - wordpress
     networks:
@@ -58,9 +51,6 @@ services:
   redis:
     container_name: redis
     image: redis:alpine
-    #restart: always
-    ports:
-      - "6379:6379"
     networks:
       - wp_db_rd
 
