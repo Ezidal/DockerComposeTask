@@ -5,14 +5,13 @@ services:
     ports:
       - 8080:80
     environment:
-      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${MYSQL_USER}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
       WORDPRESS_CONFIG_EXTRA: ${WORDPRESS_CONFIG_EXTRA}
     volumes:
       - ./wp-config.php:/var/www/html/wp-config.php
-      # - ./wp-config-sample.php:/var/www/html/wp-config-sample.php
       - ./wp-content/:/var/www/html/wp-content
     depends_on:
       db:
@@ -24,7 +23,6 @@ services:
   db:
     container_name: mysql
     image: mysql:8.0
-    #restart: always
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
@@ -41,7 +39,6 @@ services:
   nginx:
     container_name: nginx
     image: nginx
-    #restart: always
     ports:
       - "80:80"
     volumes:
@@ -54,10 +51,12 @@ services:
   redis:
     container_name: redis
     image: redis:alpine
+    #команда написана в логах при загрузке 
+    command: redis-server redis.conf
+    volumes:
+      - ./redis/:/data/
     networks:
       - wp_db_rd
-
-
 ###############
 volumes:
   wordpress:
