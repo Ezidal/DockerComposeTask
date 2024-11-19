@@ -2,6 +2,8 @@ services:
   wordpress:
     container_name: wordpress
     image: wordpress
+    env_file:
+      - .env
     ports:
       - 8080:80
     environment:
@@ -12,7 +14,21 @@ services:
       WORDPRESS_CONFIG_EXTRA: ${WORDPRESS_CONFIG_EXTRA}
     volumes:
       - ./wordpress/wp-config.php:/var/www/html/wp-config.php
-      - ./wordpress/wp-content/:/var/www/html/wp-content
+    command: >
+      /bin/sh -c "
+      docker-entrypoint.sh apache2-foreground & 
+      sleep 7 && 
+      curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && 
+      chmod +x wp-cli.phar && 
+      mv wp-cli.phar /usr/local/bin/wp && 
+      wp core install --url=localhost --title=\"${WP_TITLE}\" --admin_user=${WP_ADMIN_USER} --admin_password=\"${WP_ADMIN_PASSWORD}\" --admin_email=test@test.com --allow-root && 
+      echo 'Установка плагина Redis...' && 
+      wp plugin install redis-cache --activate --allow-root && 
+      echo 'Включение Redis...' && 
+      wp redis enable --allow-root && 
+      echo 'Настройка завершена!' && 
+      wait
+      "
     depends_on:
       db:
         condition: service_healthy
@@ -23,6 +39,8 @@ services:
   db:
     container_name: mysql
     image: mysql:8.0
+    env_file:
+      - .env
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
