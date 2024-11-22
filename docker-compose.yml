@@ -1,11 +1,10 @@
 services:
+
   wordpress:
     container_name: wordpress
     image: wordpress
     env_file:
       - .env
-    ports:
-      - 8080:80
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -37,7 +36,7 @@ services:
       - ngx_wp
       - wp_db_rd
       - universal
-################
+
   db:
     container_name: mysql
     image: mysql:8.0
@@ -58,7 +57,7 @@ services:
       interval: 3s
       timeout: 3s
       retries: 5
-#################      
+     
   nginx:
     container_name: nginx
     image: nginx
@@ -71,7 +70,7 @@ services:
     networks:
       - ngx_wp
       - universal
-###############
+
   redis:
     container_name: redis
     image: redis:alpine
@@ -82,7 +81,7 @@ services:
     networks:
       - wp_db_rd
       - universal
-  
+########## мониторинг
   node-exporter:
     image: prom/node-exporter
     container_name: node-exporter
@@ -118,11 +117,13 @@ services:
     image: prom/prometheus
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./prometheus/data:/prometheus/data
+      # - ./prometheus/data:/prometheus/data
     ports:
       - "9090:9090"
     networks:
       - universal
+    depends_on:
+      - nginx
   grafana:
     container_name: grafana
     image: grafana/grafana
@@ -132,6 +133,8 @@ services:
       - "3000:3000"
     networks:
      - universal
+    depends_on:
+      - nginx
 ###############
 volumes:
   wordpress:
