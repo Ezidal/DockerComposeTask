@@ -15,21 +15,21 @@ services:
     volumes:
       - wordpress:/var/www/html
       - ./wordpress/wp-config.php:/var/www/html/wp-config.php
-    command: >
-      /bin/sh -c "
-      docker-entrypoint.sh apache2-foreground & 
-      sleep 7 && 
-      curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && 
-      chmod +x wp-cli.phar && 
-      mv wp-cli.phar /usr/local/bin/wp && 
-      wp core install --url=localhost --title=\"${WP_TITLE}\" --admin_user=${WP_ADMIN_USER} --admin_password=\"${WP_ADMIN_PASSWORD}\" --admin_email=test@test.com --allow-root && 
-      echo 'Установка плагина Redis...' && 
-      wp plugin install redis-cache --activate --allow-root && 
-      echo 'Включение Redis...' && 
-      wp redis enable --allow-root && 
-      echo 'Настройка завершена!' && 
-      wait
-      "
+    # command: >
+    #   /bin/sh -c "
+    #   docker-entrypoint.sh apache2-foreground & 
+    #   sleep 7 && 
+    #   curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && 
+    #   chmod +x wp-cli.phar && 
+    #   mv wp-cli.phar /usr/local/bin/wp && 
+    #   wp core install --url=localhost --title=\"${WP_TITLE}\" --admin_user=${WP_ADMIN_USER} --admin_password=\"${WP_ADMIN_PASSWORD}\" --admin_email=test@test.com --allow-root && 
+    #   echo 'Установка плагина Redis...' && 
+    #   wp plugin install redis-cache --activate --allow-root && 
+    #   echo 'Включение Redis...' && 
+    #   wp redis enable --allow-root && 
+    #   echo 'Настройка завершена!' && 
+    #   wait
+    #   "
     depends_on:
       db:
         condition: service_healthy
@@ -77,6 +77,47 @@ services:
     volumes:
       - ./redis/redis.conf:/data/redis.conf
     networks:
+      - wp_db_rd
+  
+  node-exporter:
+    image: prom/node-exporter
+    container_name: node-exporter
+    ports:
+     - "9100:9100"
+    networks:
+     - ngx_wp
+     
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: nginx_exporter
+    ports:
+      - "9113:9113" 
+    environment:
+      - NGINX_SCRAPE_URI=http://localhost/nginx_status
+    networks:
+      - ngx_wp
+      - wp_db_rd
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/data:/prometheus/data
+    ports:
+      - "9090:9090"
+    networks:
+      - ngx_wp
+      - wp_db_rd
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - ngx_wp
       - wp_db_rd
 ###############
 volumes:

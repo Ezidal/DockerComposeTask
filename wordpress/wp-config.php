@@ -72,6 +72,8 @@ if (defined('WORDPRESS_CONFIG_EXTRA')) {
     eval(WORDPRESS_CONFIG_EXTRA); // Выполняем код из переменной
 }
 define ( 'WP_CACHE', true);
+
+define('PROMETHEUS_LEGACY_TYPE', true);
 // define('WP_REDIS_HOST', getenv('WP_REDIS_HOST') ); // Значение по умолчанию 'redis'
 
 // // Определение порта Redis
