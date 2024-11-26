@@ -18,7 +18,6 @@ services:
     networks:
       - ngx_wp
       - wp_db_rd
-      - universal
 
   db:
     container_name: mysql
@@ -34,7 +33,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
       - wp_db_rd
-      - universal
+
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 3s
@@ -52,7 +51,7 @@ services:
       - wordpress
     networks:
       - ngx_wp
-      - universal
+
 
   redis:
     container_name: redis
@@ -63,7 +62,7 @@ services:
       - ./redis/redis.conf:/data/redis.conf
     networks:
       - wp_db_rd
-      - universal
+
 ########## мониторинг
   node-exporter:
     image: prom/node-exporter
@@ -76,22 +75,34 @@ services:
   nginx-exporter:
     image: nginx/nginx-prometheus-exporter:latest
     container_name: nginx_exporter
-    ports:
-      - "9102:9113" 
+    # ports:
+    #   - "9102:9113" 
     networks:
+      - ngx_wp
       - universal
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor 
-    ports:
-      - "9101:8080"
+    # ports:
+    #   - "9101:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw 
       - /sys:/sys:ro 
       - /var/lib/docker/:/var/lib/docker:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - universal
+
+  promtail:
+    container_name: promtail
+    image: grafana/promtail
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./promtail/config.yaml:/etc/promtail/config.yaml
+    ports:
+      - "9080:9080"
     networks:
       - universal
 ###############
@@ -104,3 +115,4 @@ networks:
   ngx_wp:
   wp_db_rd:
   universal:
+    name: monitoring
