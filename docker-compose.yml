@@ -99,6 +99,7 @@ services:
     container_name: promtail
     image: grafana/promtail
     volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./promtail/config.yaml:/etc/promtail/config.yaml
     command:
