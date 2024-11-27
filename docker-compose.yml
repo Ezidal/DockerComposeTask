@@ -72,14 +72,14 @@ services:
     networks:
      - universal
      
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx_exporter
-    ports:
-      - "9102:9113" 
-    networks:
-      - ngx_wp
-      - universal
+  # nginx-exporter:
+  #   image: nginx/nginx-prometheus-exporter:latest
+  #   container_name: nginx_exporter
+  #   ports:
+  #     - "9102:9113" 
+  #   networks:
+  #     - ngx_wp
+  #     - universal
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
