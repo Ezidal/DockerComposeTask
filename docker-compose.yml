@@ -101,7 +101,7 @@ services:
         tag: "{{.Name}}|{{.ImageName}}"
     container_name: node-exporter
     ports:
-     - "9100:9100"
+      - "9100:9100"
     networks:
      - universal
     depends_on:
@@ -116,8 +116,8 @@ services:
         max-size: "${MAX_SIZE_LOG}"
         max-file: "${MAX_FILE_LOG}"
         tag: "{{.Name}}|{{.ImageName}}"
-    ports:
-      - "9101:8080"
+    # ports:
+    #   - "9101:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:rw 
@@ -158,4 +158,4 @@ networks:
   ngx_wp:
   wp_db_rd:
   universal:
-    name: monitoring
+    name: monitor
