@@ -3,6 +3,12 @@ services:
   wordpress:
     container_name: wordpress
     image: wordpress
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
+        tag: "{{.Name}}|{{.ImageName}}"
     environment:
       WORDPRESS_DB_HOST: ${WORDPRESS_DB_HOST}
       WORDPRESS_DB_USER: ${MYSQL_USER}
@@ -25,8 +31,8 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
         tag: "{{.Name}}|{{.ImageName}}"
     env_file:
       - .env
@@ -53,8 +59,8 @@ services:
     logging:
       driver: "json-file"
       options:
-        max-size: "10m"
-        max-file: "3"
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
         tag: "{{.Name}}|{{.ImageName}}"
     ports:
       - "80:80"
@@ -69,6 +75,12 @@ services:
   redis:
     container_name: redis
     image: redis:alpine
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
+        tag: "{{.Name}}|{{.ImageName}}"
     #команда написана в логах при загрузке 
     command: redis-server redis.conf
     volumes:
@@ -81,6 +93,12 @@ services:
 ########## мониторинг
   node-exporter:
     image: prom/node-exporter
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
+        tag: "{{.Name}}|{{.ImageName}}"
     container_name: node-exporter
     ports:
      - "9100:9100"
@@ -92,6 +110,12 @@ services:
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor 
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
+        tag: "{{.Name}}|{{.ImageName}}"
     ports:
       - "9101:8080"
     volumes:
@@ -108,6 +132,12 @@ services:
   promtail:
     container_name: promtail
     image: grafana/promtail
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "${MAX_SIZE_LOG}"
+        max-file: "${MAX_FILE_LOG}"
+        tag: "{{.Name}}|{{.ImageName}}"
     volumes:
       - /var/lib/docker/containers:/var/lib/docker/containers
       - /var/run/docker.sock:/var/run/docker.sock:ro

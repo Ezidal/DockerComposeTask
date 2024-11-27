@@ -27,3 +27,11 @@ scrape_configs:
     labels:
       job: containerlogs
       __path__: /var/lib/docker/containers/*/*log
+      
+  pipeline_stages:
+    - regex:
+        expression: '^(?P<container_name>[^|]+)\|(?P<image_name>.+)$'  # Извлекаем имя контейнера и имя образа из тега
+        source: "tag"
+    - labels:
+        container_name: '{{ .container_name }}'  # Добавляем метку container_name
+        image_name: '{{ .image_name }}'          # Добавляем метку image_name
