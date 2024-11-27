@@ -1,3 +1,6 @@
+#взял отсюда https://gist.github.com/ruanbekker/c6fa9bc6882e6f324b4319c5e3622460
+
+
 server:
   http_listen_port: 9080
   grpc_listen_port: 0
@@ -16,11 +19,33 @@ scrape_configs:
     labels:
       job: varlogs
       __path__: /var/log/*log
+      
+# - job_name: containers
+#   static_configs:
+#   - targets:
+#       - localhost
+#     labels:
+#       job: containerlogs
+#       __path__: /var/lib/docker/containers/*/*log
+
 - job_name: containers
-  entry_parser: raw
+  docker_sd_configs:
+    - host: unix:///var/run/docker.sock
+      refresh_interval: 30s
+  relabel_configs:
+    - source_labels: [__meta_docker_container_name]
+      target_label: container_name
+    - source_labels: [__meta_docker_container_id]
+      target_label: container_id
+    - source_labels: [__meta_docker_container_image]
+      target_label: image_name
+    - action: replace
+      source_labels: [__meta_docker_container_name]
+      target_label: job
+      replacement: containerlogs
   static_configs:
-  - targets:
-      - localhost
-    labels:
-      job: containerlogs
-      __path__: /var/lib/docker/containers/*/*log
+    - targets:
+        - localhost
+      labels:
+        job: containerlogs
+        __path__: /var/lib/docker/containers/*/*.log  # Путь к логам контейнеров
