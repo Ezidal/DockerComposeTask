@@ -33,7 +33,8 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
       - wp_db_rd
-
+    depends_on:
+      - promtail
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 3s
@@ -62,6 +63,8 @@ services:
       - ./redis/redis.conf:/data/redis.conf
     networks:
       - wp_db_rd
+    depends_on:
+      - promtail
 
 ########## мониторинг
   node-exporter:
@@ -71,15 +74,8 @@ services:
      - "9100:9100"
     networks:
      - universal
-     
-  # nginx-exporter:
-  #   image: nginx/nginx-prometheus-exporter:latest
-  #   container_name: nginx_exporter
-  #   ports:
-  #     - "9102:9113" 
-  #   networks:
-  #     - ngx_wp
-  #     - universal
+    depends_on:
+      - promtail
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -94,6 +90,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
       - universal
+    depends_on:
+      - promtail
 
   promtail:
     container_name: promtail
@@ -108,6 +106,8 @@ services:
       - "9080:9080"
     networks:
       - universal
+    depends_on:
+      - promtail
 ###############
 volumes:
   wordpress:
