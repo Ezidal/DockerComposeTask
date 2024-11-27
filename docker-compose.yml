@@ -22,6 +22,12 @@ services:
   db:
     container_name: mysql
     image: mysql:8.0
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "{{.Name}}|{{.ImageName}}"
     env_file:
       - .env
     volumes:
@@ -44,6 +50,12 @@ services:
   nginx:
     container_name: nginx
     image: nginx
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "{{.Name}}|{{.ImageName}}"
     ports:
       - "80:80"
     volumes:
