@@ -18,12 +18,15 @@ services:
     volumes:
       - wordpress:/var/www/html
       - ./wordpress/wp-config.php:/var/www/html/wp-config.php
+    ports:
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
     networks:
       - ngx_wp
       - wp_db_rd
+      - universal
 
   db:
     container_name: mysql
@@ -67,7 +70,8 @@ services:
     volumes:
       - ./nginx:/etc/nginx/conf.d/
     depends_on:
-      - wordpress
+      keycloak:
+        condition: service_healthy
     networks:
       - ngx_wp
 
@@ -148,11 +152,71 @@ services:
       - "9080:9080"
     networks:
       - universal
+  
+  keycloak-postgres:
+    image: library/postgres
+    container_name: postgres
+    restart: on-failure
+    #volumes:
+    #  - keycloak-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: pg_isready -d postgres
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    ports:
+      - 5432:5432
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+    networks:
+      - universal
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0.2
+    container_name: keycloak
+    command:
+      - start --auto-build --db postgres --hostname-strict-https false --hostname-strict false --proxy edge --http-enabled true --import-realm --spi-user-profile-legacy-user-profile-read-only-attributes *_RES_ACCESS_MODE
+    environment:
+      KC_DB_URL: jdbc:postgresql://keycloak-postgres:5432/postgres
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_DB_SCHEMA: public
+      KC_FEATURES: preview
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - 8282:8080
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
+    # volumes:
+    #   - type: bind
+    #     source: ./keycloak/client1.json
+    #     target: /opt/keycloak/data/import/realm-export.json
+    #     read_only: true
+    depends_on:
+      keycloak-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://0.0.0.0:8080/realms/master"]
+      start_period: 10s
+      interval: 30s
+      retries: 3
+      timeout: 5s
+    networks:
+      - universal
 ###############
 volumes:
   wordpress:
   db:
   nginx:
+  keycloak-postgres:
 
 networks:
   ngx_wp:
